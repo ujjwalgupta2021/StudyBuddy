@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyBuddy — Pomodoro · Flashcards · Quiz</title>
+  <meta name="description" content="StudyBuddy helps you study smarter with a configurable Pomodoro timer, custom flashcards, and an interactive quiz mode." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🦉</div>
+      <span class="logo-text">StudyBuddy</span>
+    </div>
+
+    <nav class="nav" role="navigation" aria-label="Main navigation">
+      <button class="nav-btn active" id="nav-pomodoro" onclick="showTab('pomodoro')" aria-current="page">
+        <span class="nav-icon">⏱️</span>
+        <span class="nav-label">Pomodoro</span>
+      </button>
+      <button class="nav-btn" id="nav-flashcards" onclick="showTab('flashcards')">
+        <span class="nav-icon">🃏</span>
+        <span class="nav-label">Flashcards</span>
+      </button>
+      <button class="nav-btn" id="nav-quiz" onclick="showTab('quiz')">
+        <span class="nav-icon">🧠</span>
+        <span class="nav-label">Quiz</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-stats">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-sessions">0</span>
+        <span class="stat-label">Sessions</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-cards">0</span>
+        <span class="stat-label">Cards</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-score">0%</span>
+        <span class="stat-label">Quiz Score</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ───────────────────────────────────── -->
+  <main class="main" id="main-content">
+
+    <!-- ═══════════════ POMODORO ══════════════════════════ -->
+    <section class="tab-panel active" id="tab-pomodoro" aria-labelledby="nav-pomodoro">
+      <div class="section-header">
+        <h1 class="section-title">Pomodoro Timer</h1>
+        <p class="section-sub">Stay focused, take smart breaks</p>
+      </div>
+
+      <div class="pomodoro-layout">
+        <!-- Left: Pill selector + Timer -->
+        <div class="pomodoro-left">
+          <div class="mode-pills" role="group" aria-label="Timer mode">
+            <button class="pill active" id="pill-focus"   onclick="setMode('focus')"   aria-pressed="true">Focus</button>
+            <button class="pill"        id="pill-short"   onclick="setMode('short')"   aria-pressed="false">Short Break</button>
+            <button class="pill"        id="pill-long"    onclick="setMode('long')"    aria-pressed="false">Long Break</button>
+          </div>
+
+          <div class="timer-card">
+            <div class="timer-ring-wrap">
+              <svg class="timer-ring" viewBox="0 0 220 220" width="220" height="220">
+                <circle class="ring-bg"   cx="110" cy="110" r="98" />
+                <circle class="ring-fill" cx="110" cy="110" r="98" id="ring-fill" />
+              </svg>
+              <div class="timer-display" id="timer-display">25:00</div>
+              <div class="timer-mode-label" id="timer-mode-label">Focus Time</div>
+            </div>
+
+            <div class="timer-controls">
+              <button class="ctrl-btn" id="btn-reset" onclick="resetTimer()" title="Reset">↺</button>
+              <button class="ctrl-btn primary" id="btn-start" onclick="toggleTimer()">▶ Start</button>
+              <button class="ctrl-btn" id="btn-skip"  onclick="skipSession()" title="Skip">⏭</button>
+            </div>
+
+            <div class="session-dots" id="session-dots">
+              <span class="dot active"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Settings -->
+        <div class="settings-card">
+          <h2 class="settings-title">⚙️ Timer Settings</h2>
+          <div class="settings-grid">
+            <div class="setting-row">
+              <label for="set-focus">Focus (min)</label>
+              <div class="input-stepper">
+                <button onclick="stepSetting('focus',-1)">−</button>
+                <input type="number" id="set-focus" value="25" min="1" max="90" onchange="applySettings()" />
+                <button onclick="stepSetting('focus',1)">+</button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <label for="set-short">Short Break (min)</label>
+              <div class="input-stepper">
+                <button onclick="stepSetting('short',-1)">−</button>
+                <input type="number" id="set-short" value="5" min="1" max="30" onchange="applySettings()" />
+                <button onclick="stepSetting('short',1)">+</button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <label for="set-long">Long Break (min)</label>
+              <div class="input-stepper">
+                <button onclick="stepSetting('long',-1)">−</button>
+                <input type="number" id="set-long" value="15" min="1" max="60" onchange="applySettings()" />
+                <button onclick="stepSetting('long',1)">+</button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <label for="set-sessions">Sessions before Long Break</label>
+              <div class="input-stepper">
+                <button onclick="stepSetting('sessions',-1)">−</button>
+                <input type="number" id="set-sessions" value="4" min="1" max="10" onchange="applySettings()" />
+                <button onclick="stepSetting('sessions',1)">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="setting-row toggle-row">
+            <label for="set-sound">Sound Alerts</label>
+            <label class="toggle" for="set-sound">
+              <input type="checkbox" id="set-sound" checked />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row toggle-row">
+            <label for="set-autostart">Auto-start next session</label>
+            <label class="toggle" for="set-autostart">
+              <input type="checkbox" id="set-autostart" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══════════════ FLASHCARDS ════════════════════════ -->
+    <section class="tab-panel" id="tab-flashcards" aria-labelledby="nav-flashcards">
+      <div class="section-header">
+        <h1 class="section-title">Flashcards</h1>
+        <p class="section-sub">Build your card deck and study</p>
+      </div>
+
+      <div class="fc-layout">
+        <div class="fc-viewer-col">
+          <div class="fc-deck-info">
+            <span id="fc-counter">0 / 0 cards</span>
+            <div class="fc-nav-btns">
+              <button class="icon-btn" onclick="prevCard()" title="Previous">◀</button>
+              <button class="icon-btn" onclick="nextCard()" title="Next">▶</button>
+            </div>
+          </div>
+
+          <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="fc-inner" id="fc-inner">
+              <div class="fc-front">
+                <div class="fc-label">Question</div>
+                <div class="fc-text" id="fc-front-text">Add cards to get started!</div>
+              </div>
+              <div class="fc-back">
+                <div class="fc-label">Answer</div>
+                <div class="fc-text" id="fc-back-text"></div>
+              </div>
+            </div>
+          </div>
+          <p class="fc-hint">Click card to flip · Use arrows to navigate</p>
+
+          <div class="fc-rating" id="fc-rating" style="display:none">
+            <p class="rating-label">How well did you know this?</p>
+            <div class="rating-btns">
+              <button class="rating-btn bad"  onclick="rateCard(0)">😕 Hard</button>
+              <button class="rating-btn ok"   onclick="rateCard(1)">🙂 OK</button>
+              <button class="rating-btn good" onclick="rateCard(2)">😄 Easy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-editor-col">
+          <div class="editor-card">
+            <h2 class="editor-title">➕ Add / Edit Card</h2>
+            <div class="form-group">
+              <label for="fc-q-input">Question / Front</label>
+              <textarea id="fc-q-input" rows="3" placeholder="Enter question…"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="fc-a-input">Answer / Back</label>
+              <textarea id="fc-a-input" rows="3" placeholder="Enter answer…"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="fc-deck-input">Deck / Tag (optional)</label>
+              <input type="text" id="fc-deck-input" placeholder="e.g. Biology, Math…" />
+            </div>
+            <div class="editor-btns">
+              <button class="btn-primary" id="fc-add-btn" onclick="addCard()">Add Card</button>
+              <button class="btn-ghost"  onclick="clearCardForm()">Clear</button>
+            </div>
+          </div>
+
+          <div class="card-list-header">
+            <h2 class="editor-title">📚 Your Cards</h2>
+            <button class="btn-ghost small" onclick="clearAllCards()">Clear All</button>
+          </div>
+          <div class="card-list" id="card-list">
+            <p class="empty-msg" id="fc-empty">No cards yet. Add some above!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ QUIZ ═══════════════════════════════ -->
+    <section class="tab-panel" id="tab-quiz" aria-labelledby="nav-quiz">
+      <div class="section-header">
+        <h1 class="section-title">Quiz Mode</h1>
+        <p class="section-sub">Test your knowledge with custom questions</p>
+      </div>
+
+      <div id="quiz-setup">
+        <div class="quiz-setup-grid">
+          <div class="quiz-builder-card">
+            <h2 class="editor-title">✏️ Add Question</h2>
+            <div class="form-group">
+              <label for="qz-question">Question</label>
+              <textarea id="qz-question" rows="2" placeholder="Type your question…"></textarea>
+            </div>
+            <div class="qz-options-wrap">
+              <label>Answer Options (select ✓ to mark correct)</label>
+              <div id="qz-options-list">
+                <div class="qz-option-row">
+                  <input type="radio" name="correct-ans" value="0" id="correct-0" checked />
+                  <label for="correct-0" class="radio-correct-label" title="Mark as correct">✓</label>
+                  <input type="text" class="qz-opt-input" placeholder="Option A" />
+                </div>
+                <div class="qz-option-row">
+                  <input type="radio" name="correct-ans" value="1" id="correct-1" />
+                  <label for="correct-1" class="radio-correct-label" title="Mark as correct">✓</label>
+                  <input type="text" class="qz-opt-input" placeholder="Option B" />
+                </div>
+                <div class="qz-option-row">
+                  <input type="radio" name="correct-ans" value="2" id="correct-2" />
+                  <label for="correct-2" class="radio-correct-label" title="Mark as correct">✓</label>
+                  <input type="text" class="qz-opt-input" placeholder="Option C" />
+                </div>
+                <div class="qz-option-row">
+                  <input type="radio" name="correct-ans" value="3" id="correct-3" />
+                  <label for="correct-3" class="radio-correct-label" title="Mark as correct">✓</label>
+                  <input type="text" class="qz-opt-input" placeholder="Option D" />
+                </div>
+              </div>
+            </div>
+            <div class="editor-btns" style="margin-top:1rem">
+              <button class="btn-primary" onclick="addQuestion()">Add Question</button>
+              <button class="btn-ghost"  onclick="clearQuizForm()">Clear</button>
+            </div>
+          </div>
+
+          <div class="quiz-list-col">
+            <div class="card-list-header">
+              <h2 class="editor-title">📋 Questions (<span id="qz-count">0</span>)</h2>
+              <button class="btn-ghost small" onclick="clearAllQuestions()">Clear All</button>
+            </div>
+            <div class="card-list" id="question-list">
+              <p class="empty-msg" id="qz-empty">No questions yet.</p>
+            </div>
+
+            <div class="quiz-settings-row">
+              <div class="form-group" style="flex:1">
+                <label for="qz-time">Time per question (sec)</label>
+                <input type="number" id="qz-time" value="30" min="5" max="300" />
+              </div>
+              <div class="form-group" style="flex:1">
+                <label for="qz-shuffle" style="display:block;margin-bottom:4px">Shuffle Questions</label>
+                <label class="toggle" for="qz-shuffle">
+                  <input type="checkbox" id="qz-shuffle" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <button class="btn-primary wide" id="start-quiz-btn" onclick="startQuiz()">🚀 Start Quiz</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="quiz-active" style="display:none">
+        <div class="quiz-progress-bar-wrap">
+          <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+        </div>
+        <div class="quiz-meta">
+          <span id="qz-progress-label">Question 1 / 5</span>
+          <span class="qz-timer-badge" id="qz-timer-badge">⏱ 30s</span>
+          <span id="qz-score-live">Score: 0</span>
+        </div>
+
+        <div class="quiz-question-card" id="quiz-q-card">
+          <div class="qz-q-text" id="qz-q-text"></div>
+          <div class="qz-answers" id="qz-answers"></div>
+          <button class="btn-ghost" id="qz-next-btn" onclick="nextQuestion()" style="display:none;margin-top:1.5rem">Next →</button>
+        </div>
+      </div>
+
+      <div id="quiz-results" style="display:none">
+        <div class="results-card">
+          <div class="results-emoji" id="results-emoji">🎉</div>
+          <h2 class="results-title" id="results-title">Quiz Complete!</h2>
+          <div class="results-score" id="results-score">0 / 0</div>
+          <div class="results-pct" id="results-pct">0%</div>
+          <div class="results-bar-wrap">
+            <div class="results-bar" id="results-bar"></div>
+          </div>
+          <div class="results-review" id="results-review"></div>
+          <div class="results-btns">
+            <button class="btn-primary" onclick="retryQuiz()">🔄 Retry</button>
+            <button class="btn-ghost"  onclick="backToSetup()">✏️ Edit Questions</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
