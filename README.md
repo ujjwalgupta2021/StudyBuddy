@@ -1,7 +1,7 @@
 ---
 title: "StudyBuddy — Pomodoro, Flashcards & Quiz in One Beautiful App 🦉"
 published: true
-tags: hacktoberfest, hacktoberfest2026, webdev, javascript
+tags: devchallenge, weekendchallenge, hf26challenge, webdev
 ---
 
 *This is a submission for the [Hacktoberfest Weekend Challenge: Build for a Friend](https://dev.to/challenges/hacktoberfest-weekend-2026-10-01)*
